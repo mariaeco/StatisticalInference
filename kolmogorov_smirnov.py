@@ -86,8 +86,13 @@ else:
     print(" --> A variavel Producao de Maquinas em 36 meses Segue uma Distribuicao Normal <-- ")
     
 
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+ax1.hist(df['Fabs'], bins=6, edgecolor='black')  # 'bins' define o número de caixas no histograma
+ax1.set_title('Frequencia absuoluta')
 
-plt.hist(df['Exp(i)_Obs(i)'], bins=6, edgecolor='black')  # 'bins' define o número de caixas no histograma
+ax2.hist(df['Exp(i)_Obs(i)'], bins=6, edgecolor='black')  # 'bins' define o número de caixas no histograma
+ax2.set_title('Exp(i)_Obs(i)')
+
+
 plt.show()
-
 
