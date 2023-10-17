@@ -7,92 +7,96 @@ import math
 #pip install scipy  #INSTALAR ASSIM PRIMEIRO
 import scipy.stats as st 
 
+class Kolmogorov:
+    def __init__(self, arquivo, alfa):
+        self.alfa = alfa
+        amostra = pd.read_csv(arquivo)
+        media = amostra.iloc[:, 1].mean()
+        sd = amostra.iloc[:, 1].std()
+        # Frequência Absoluta
+        df = amostra.iloc[:, 1].value_counts().reset_index()
+                 # ver valores na segunda coluna
+        df.rename(columns={df.columns[0]: 'X_i', df.columns[1]: 'F_absoluta'}, inplace=True)
+        df = df.sort_values(by='X_i', ascending=True).reset_index(drop=True)
 
-alfa = 0.05 #5%
-maqAgric = pd.read_csv("maquinaAgric.csv")
+        # Frequência Acumulada
+        df['F_acumulada'] = np.cumsum(df['F_absoluta'])
 
+        # Frequência Acumulada Relativa
+        num_amostras = sum(df['F_absoluta'])
+        self.num_amostras = num_amostras
+        df['F_observada'] = df['F_acumulada']/num_amostras
 
-#Frequencia absoluta
-df = maqAgric['ProdMaq'].value_counts().reset_index()#maqAgric.ProdMaq.value_counts()
-df.rename(columns={'ProdMaq': 'X_i', 'count': 'Fabs'}, inplace=True)
-df = df.sort_values(by='X_i', ascending=True).reset_index(drop=True)
+        # Zcalculado
+        df['Zcalc'] = round((df['X_i'] - media)/sd,2)
 
-#Frequencia acumulada
-df['Fac'] = np.cumsum(df['Fabs'])
+        # Calculando F_esperado(X_i) - F_observado(X_i)
+        m = len(df['Zcalc']) # qtd de producoes distintas
+        F_esp = []
+        for z in range(0, m):
+            valor = st.norm.cdf(df['Zcalc'][z]) # Calcular distribuição normal acumulada
+            F_esp.append(round(valor,4))
 
-#Frequencia acumulada relativa
-Namostras = sum(df['Fabs'])
-df['Fobs'] = df['Fac']/Namostras
+        df['F_esperado'] = F_esp
+        df['F_esp(X_i)-F_obs(X_i)'] = abs(F_esp-df['F_observada'])
+        
+        # Calculando F_esperado(X_i) - F_observado(X_i-1)
+        F_espobs2 = [round(df['F_esperado'][0],4)] # a primeira linha não muda quanto ao F_esperado
+        for i in range(1, len(F_esp)):
+            valor = abs(F_esp[i] - df['F_observada'][i-1])
+            F_espobs2.append(valor)
 
-#Zcalculado
-mu = maqAgric['ProdMaq'].mean()
-sd = maqAgric['ProdMaq'].std()
-df['Zcalc'] = (df['X_i']-mu)/sd
+        df['F_esp(X_i)-F_obs(X_i-1)'] = F_espobs2
 
-valores_formatados = []
-# Percorra cada valor em df['Zcalc']
+        #
+        self.df = df
 
-for valor in df['Zcalc']:
-    # Formate o valor para duas casas decimais sem arredondar
-    valor_formatado = round(valor,2)
-    #valor_formatado = trunc(valor * 100) / 100 #aqui faço o corte do valor sem arredondar, pq estava diferenca o final sem arredondar
-    valores_formatados.append(valor_formatado)
+    def show_tabela(self):
+        print("\n----------- Tabela: Kolmogorov-Smirnov -----------")
+        print(self.df)
 
-df['Zcalc'] = valores_formatados
+    def is_normal(self):
+        max1 = max(self.df['F_esp(X_i)-F_obs(X_i)'])
+        max2 = max(self.df['F_esp(X_i)-F_obs(X_i-1)'])
+        Dcalc = max(max1,max2)
+        print("\nDcalculado: ", round(Dcalc,3))
 
-normalTb = pd.read_csv("normalTable_leftcum.csv")
-#print(normalTb)
+        # Achar valor critico
+        criticalV = pd.read_csv("kolmogorovCriticalvalues.csv")
+        
+        if self.num_amostras <= 35:
+            Dcrit = criticalV.columns['self.alfa'][self.num_amostras]
+        else:
+            match self.alfa:
+                case 0.2:
+                    Dcrit = 1.07/math.sqrt(self.num_amostras)
+                case 0.15:
+                    Dcrit = 1.14/math.sqrt(self.num_amostras)
+                case 0.1:
+                    Dcrit = 1.22/math.sqrt(self.num_amostras)
+                case 0.05:
+                    Dcrit = 1.36/math.sqrt(self.num_amostras)
+                case 0.01:
+                    Dcrit = 1.63/math.sqrt(self.num_amostras)
 
-m = len(df['Zcalc']) #11 qtd de producoes distintas
-Fesp = []
+        print("DCritico: ", round(Dcrit,3))
+        if(Dcalc > Dcrit):
+            print(" --> A variavel Producao de Maquinas em 36 meses NAO Segue uma Distribuicao Normal <--")
+        else:
+            print(" --> A variavel Producao de Maquinas em 36 meses Segue uma Distribuicao Normal <-- ")
+            
+    def plot_grafico(self):
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+        ax1.hist(self.df['F_absoluta'], bins=6, edgecolor='black')  # 'bins' define o número de caixas no histograma
+        ax1.set_title('Frequencia absoluta')
 
-for z in range(0, m):
-    valor = st.norm.cdf(df['Zcalc'][z])
-    #valor = trunc(valor * 10000) / 10000 
-    Fesp.append(round(valor,4))
+        ax2.hist(self.df['F_esp(X_i)-F_obs(X_i)'], bins=6, edgecolor='black')  # 'bins' define o número de caixas no histograma
+        ax2.set_title('F_esp(X_i)-F_obs(X_i)')
 
-df['Fesp'] = Fesp
-df['Exp(i)_Obs(i)'] = abs(Fesp-df['Fobs'])
+        plt.show()
 
-
-Fespobs2 = [round(df['Fesp'][0],4)]
-for i in range(1, len(Fesp)):
-    valor = Fesp[i] - df['Fobs'][i-1]
-    Fespobs2.append(valor)
-
-df['Exp(i)_Obs(i-1)'] = Fespobs2
-
-#print(normalTb)
-print("\n----------- Tabela: Kolmogorov-Smirnov -----------")
-print(df)
-
-
-max1 = max(df['Exp(i)_Obs(i)'])
-max2 = max(df['Exp(i)_Obs(i-1)'])
-
-Dcalc = max(max1,max2)
-print("\nDcalculado: ", round(Dcalc,3))
-
-#ver arquivo Tabela-Kolmogorov-valoresCriticos.pdf
-Dcrit = 1.36/math.sqrt(Namostras)
-print("DCritico: ", round(Dcrit,3))
-#caso modifique o numero das seja <35 preciso modificar essa funcao do Dcritico para procurar na tabela
-#criticalV = pd.read_csv("kolmogorovCriticalvalues.csv")
-#print(criticalV)
-
-if(Dcalc > Dcrit):
-    print(" --> A variavel Producao de Maquinas em 36 meses NAO Segue uma Distribuicao Normal <--")
-else:
-    print(" --> A variavel Producao de Maquinas em 36 meses Segue uma Distribuicao Normal <-- ")
-    
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
-ax1.hist(df['Fabs'], bins=6, edgecolor='black')  # 'bins' define o número de caixas no histograma
-ax1.set_title('Frequencia absuoluta')
-
-ax2.hist(df['Exp(i)_Obs(i)'], bins=6, edgecolor='black')  # 'bins' define o número de caixas no histograma
-ax2.set_title('Exp(i)_Obs(i)')
-
-
-plt.show()
-
+normalTb = pd.read_csv("normalTable_leftcum.csv")       
+ks = Kolmogorov("maquinaAgric.csv", 0.05)
+ks.show_tabela()
+ks.is_normal()
+ks.plot_grafico()
