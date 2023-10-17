@@ -47,17 +47,12 @@ m = len(df['Zcalc']) #11 qtd de producoes distintas
 
 
 '''
-#Para pegar o valor correspondente na tabela z (normalTb) que eh o Fesp --> Ainda não consegui
+#Para pegar o valor correspondente na tabela z (normalTb) que eh o Fesp --> Ainda não fiz
+#Lembrar que a tabela z tem na primeira coluna o valor de z com a primeira casa decimal apenas
+#E a primeira linha são os nomes das colunas, que contem os valores da segunda casa decimal de z
+#cruzando achamos o valor do teste
+#Exemplo para z = -1.78, tenho que ir na linha 18, coluna 9 = o valor correspondente eh 0.0375
 ndecimais = 11 # tenho 11 colunas, quero os resultados correspondentes a segunda casa decimal, que começa a partir da segunda coluna, pois a primeira é o z-score até a primeira casa decimal
-for s in range(0,m):
-    valor = trunc(df['Zcalc'][s] * 10) / 10
-    for c in range(1, ndecimais):
-        print('Coluna:', c)
-        print('Linha :', valor)
-        print('Valor :', normalTb.iloc[1][c])
-        for l in range(0,n):
-            if(valor == normalTb.iloc[l][0]):
-                print(normalTb.iloc[l][c])
 '''
 
 #print(normalTb)
