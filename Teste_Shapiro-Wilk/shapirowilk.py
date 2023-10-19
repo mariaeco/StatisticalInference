@@ -21,6 +21,23 @@ class ShapiroWilkTest:
         self.df["X_i"] = [self.data[self.target_column][i] for i in range(0,len(self.df))]
         self.df["a_i,n (X_(n-i+1) - X_i)"] = self.df["a_i,n"] * (self.df["X_(n-i+1)"] - self.df["X_i"])
 
+    def run_test(self):
+        media = self.data[self.target_column].mean()
+        b = sum(self.df["a_i,n (X_(n-i+1) - X_i)"])
+        w_calc = (b**2)/(sum((xi - media)**2 for xi in self.data[self.target_column]))
+        w_crit = criticos[str(self.alpha)][len(self.data)-3] # pois a amostra começa tamanho 3
+        print("\n----------- Tabela: Shapiro-Wilk -----------")
+        print(self.df)
+
+        print("\nWcalculado:", round(w_calc, 3))
+        print("WCritico:", round(w_crit, 3))
+
+        if w_calc > w_crit:
+            print(" --> A variável NAO Segue uma Distribuicao Normal <--")
+        else:
+            print(" --> A variável Segue uma Distribuicao Normal <--")
+
 coeficientes = pd.read_csv("coeficientesShapiro.csv", na_values="NA")
+criticos = pd.read_csv("valoresCriticosShapiro.csv")
 sw = ShapiroWilkTest("p_mensal_avioes.csv", "prodAvioes", 0.01)
-    
+sw.run_test()
