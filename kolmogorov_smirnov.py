@@ -75,7 +75,12 @@ class KolmogorovSmirnovTest:
         else:
             print(" --> A variável Segue uma Distribuicao Normal <--")
 
-    def plot_histograms(self):
+
+
+    #Se a variavel for CONTINUA USAR HISTOGRAMA
+    #Se for Discreta, GRAFICO DE BARRAS    
+    ''' 
+    def graficos(self): 
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
         ax1.hist(self.data[self.target_column], bins=6, edgecolor='black') #self.frequency_absolute['Fabs']
         variable_name = self.target_column
@@ -85,21 +90,48 @@ class KolmogorovSmirnovTest:
         ax2.set_title('Esperado x Observado')
         ax2.set_ylabel("Frequencia Observada")
         ax2.set_xlabel("Frequencia Esperada")
-        
         # Define the parameters of the model (slope and intercept)
         slope = 1  # Change this to your desired slope
         intercept = 0  # Change this to your desired intercept
-
         # Add the line of the model
         x_model = np.linspace(0, 1, 100)  # Create x-values for the line
         y_model = slope * x_model + intercept  # Calculate y-values based on the model
         plt.plot(x_model, y_model, linestyle='-', color='red', label=f'Model: y = {slope}x + {intercept}')
         plt.show()
+    '''        
+        
+    def graficos(self):
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+        # Use plt.bar para criar um gráfico de barras
+        unique_values, counts = np.unique(self.data[self.target_column], return_counts=True)
+        ax1.bar(unique_values, counts, align='center', edgecolor='black')
+        variable_name = self.target_column
+        ax1.set_xlabel(f'{variable_name}')
+        ax1.set_ylabel('Count')  # Adicione um rótulo ao eixo y
+        ax1.set_title('Bar Chart')  # Altere o título para "Bar Chart"
+        
+        ax2.scatter(self.frequency_absolute['Fesp'],self.frequency_absolute['Fobs'])
+        ax2.set_title('Esperado x Observado')
+        ax2.set_ylabel("Frequencia Observada")
+        ax2.set_xlabel("Frequencia Esperada")
+        # Define the parameters of the model (slope and intercept)
+        slope = 1  # Change this to your desired slope
+        intercept = 0  # Change this to your desired intercept
+        # Add the line of the model
+        x_model = np.linspace(0, 1, 100)  # Create x-values for the line
+        y_model = slope * x_model + intercept  # Calculate y-values based on the model
+        plt.plot(x_model, y_model, linestyle='-', color='red', label=f'Model: y = {slope}x + {intercept}')
+        plt.show()
+        
+
 
 if __name__ == "__main__":
-    ks = KolmogorovSmirnovTest("maquinaAgric2.csv", "Faturamento", 0.05)
+    
+    ks = KolmogorovSmirnovTest("maquinaAgric2.csv", "ProdMaq", 0.05)
     ks.calculate_expected()
     ks.run_test()
-    ks.plot_histograms()
+    #ks.plot_histograms()
+    ks.graficos()
+    
     
     

@@ -33,22 +33,36 @@ class ShapiroWilkTest:
         print("WCritico:", round(w_crit, 3))
 
         if w_calc > w_crit:
-            print(" --> A variável NAO Segue uma Distribuicao Normal <--")
+            print(" --> A variável  Segue uma Distribuicao Normal <--")
         else:
-            print(" --> A variável Segue uma Distribuicao Normal <--")
+            print(" --> A variável NAO Segue uma Distribuicao Normal <--")
             
-    
-    def plot_histograms(self):
+
+    #Se a variavel for CONTINUA USAR HISTOGRAMA
+    #Se for Discreta, GRAFICO DE BARRAS            
+    '''
+    def plot_histograms(self):# HISTOGRAMA APENAS PARA VARIAVEIS CONTINUAS
         fig, (ax1) = plt.subplots(1, 1, figsize=(10, 4))
         ax1.hist(self.data[self.target_column], bins=6, edgecolor='black') 
         variable_name = self.target_column
         ax1.set_xlabel(f'{variable_name}')
         ax1.set_title('Histogram')
         plt.show()
+        '''
+    def barplot(self):
+        fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
+        # Use plt.bar para criar um gráfico de barras
+        unique_values, counts = np.unique(self.data[self.target_column], return_counts=True)
+        ax1.bar(unique_values, counts, align='center', edgecolor='black')
+        variable_name = self.target_column
+        ax1.set_xlabel(f'{variable_name}')
+        ax1.set_ylabel('Count')  # Adicione um rótulo ao eixo y
+        ax1.set_title('Bar Chart')  # Altere o título para "Bar Chart"
+        plt.show()
 
 coeficientes = pd.read_csv("coeficientesShapiro.csv", na_values="NA")
 criticos = pd.read_csv("valoresCriticosShapiro.csv")
 sw = ShapiroWilkTest("p_mensal_avioes.csv", "prodAvioes", 0.01)
 sw.run_test()
-sw.plot_histograms()
-    
+#sw.plot_histograms()
+sw.barplot()
