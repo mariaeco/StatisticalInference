@@ -60,6 +60,8 @@ class ShapiroWilkTest:
         ax1.set_title('Bar Chart')  # Altere o título para "Bar Chart"
         plt.show()
 
+
+
 coeficientes = pd.read_csv("coeficientesShapiro.csv", na_values="NA")
 criticos = pd.read_csv("valoresCriticosShapiro.csv")
 sw = ShapiroWilkTest("p_mensal_avioes.csv", "prodAvioes", 0.01)
