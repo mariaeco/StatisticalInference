@@ -54,8 +54,8 @@ class ShapiroWilkTest:
         
          
     #PLOTANDO GRAFICO DE BARRA PQ A VARIAVEL É DISCRETA - SE FOR CONTINA DEVE PLOTAR HISTOGRAMA
-    def barplot(self):
-        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(13, 4))
+    def grafico(self):
+        fig, ((ax1, ax2),(ax3, ax4)) = plt.subplots(2, 2, figsize=(8, 10))
         # Use plt.bar para criar um gráfico de barras
         unique_values, counts = np.unique(self.data[self.target_column], return_counts=True)
         ax1.bar(unique_values, counts, align='center', edgecolor='black')
@@ -64,24 +64,36 @@ class ShapiroWilkTest:
         ax1.set_ylabel('Count')  # Adicione um rótulo ao eixo y
         ax1.set_title('Grafico de Barras')  # Altere o título para "Bar Chart"
         
+        #PLOT 2 - OBSERVADO X ESPERADO -------------------------------------------------------------------------------------
+        dados_ordenados = np.sort(self.data[self.target_column])
+        # Calcule os quantis teóricos para uma distribuição normal
+        n = len(self.data)
+        quantis_teoricos = np.percentile(np.random.normal(0, 1, n), np.arange(0, n))
+        # Crie o gráfico Q-Q plot manualmente
+        ax2.scatter(quantis_teoricos, dados_ordenados)
+        ax2.set_xlabel('Quantis Teóricos')
+        ax2.set_ylabel('Quantis Observados')
+        ax2.set_title('Q-Q Plot')
+ 
+        
         #PLOT 3 - ALPHA X DCRITIC -------------------------------------------------------------------------------------
         colors = ['red' if self.w_calc < Wcrit else 'blue' for Wcrit in self.w_crit]
         bin = [0 if self.w_calc < Wcrit else 1 for Wcrit in self.w_crit]
         
-        ax2.scatter(self.a_values,self.w_crit, c = colors)
-        ax2.axhline(y=self.w_calc, color='black', linestyle='--')
-        ax2.set_title('Wcalculado < Wcritico: Rejeita H0')
-        ax2.set_ylabel("Wcritico")
-        ax2.set_xlabel("Alpha value")
-        ax2.text(0.01, self.w_calc + 0.0001, f'Wcalculado: {self.w_calc:.2f}', color='black')
+        ax3.scatter(self.a_values,self.w_crit, c = colors)
+        ax3.axhline(y=self.w_calc, color='black', linestyle='--')
+        ax3.set_title('Wcalculado < Wcritico: Rejeita H0')
+        ax3.set_ylabel("Wcritico")
+        ax3.set_xlabel("Alpha value")
+        ax3.text(0.01, self.w_calc + 0.0001, f'Wcalculado: {self.w_calc:.2f}', color='black')
         handles, labels = ax3.get_legend_handles_labels() #legendas
         red_patch = mpatches.Patch(color='red', label='Rejeita H0 - Nao Normal')
         blue_patch = mpatches.Patch(color='blue', label='Aceita H0 - Dist Normal')
-        ax2.legend(handles=[blue_patch, red_patch])
+        ax3.legend(handles=[blue_patch, red_patch])
 
-        ax3.scatter(self.a_values,bin, c = colors)
-        ax3.set_ylabel("0 - Rejeita/ 1 - Aceita H0")
-        ax3.set_xlabel("Alpha value")
+        ax4.scatter(self.a_values,bin, c = colors)
+        ax4.set_ylabel("0 - Rejeita/ 1 - Aceita H0")
+        ax4.set_xlabel("Alpha value")
 
         
         
@@ -92,4 +104,4 @@ coeficientes = pd.read_csv("coeficientesShapiro.csv", na_values="NA")
 criticos = pd.read_csv("valoresCriticosShapiro.csv")
 sw = ShapiroWilkTest()
 sw.run_test()
-sw.barplot()
+sw.grafico()
