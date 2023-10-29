@@ -8,7 +8,7 @@ import random
 
 class KolmogorovSmirnovTest:
     def __init__(self):
-        #self.alpha = alpha
+        
         min_value = 1
         max_value = 70
         num_samples = 300  # Esse eh o numero maximo q tenho da tabela de valores criticos de kolmogorov
@@ -49,7 +49,6 @@ class KolmogorovSmirnovTest:
     def run_test(self):
         self.a_values = [0.2, 0.15, 0.1, 0.05, 0.01]
         
-        
         max1 = max(self.frequency_absolute['Exp(i)_Obs(i)'])
         max2 = max(self.frequency_absolute['Exp(i)_Obs(i-1)'])
         self.D_calc = max(max1, max2)
@@ -80,7 +79,7 @@ class KolmogorovSmirnovTest:
         print(self.frequency_absolute)
         
         return self.Dcrit_values
-        
+    #PLOTANDO GRAFICO DE BARRA PQ A VARIAVEL É DISCRETA - SE FOR CONTINA DEVE PLOTAR HISTOGRAMA        
     def graficos(self):
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(8, 10))
         plt.subplots_adjust(hspace=0.4) # aumento a distancia entre graficos superiores e inferiores
@@ -111,11 +110,11 @@ class KolmogorovSmirnovTest:
         bin = [0 if self.D_calc > Dcrit else 1 for Dcrit in self.Dcrit_values]
         
         ax3.scatter(self.a_values,self.Dcrit_values, c = colors)
-        ax3.axhline(y=self.D_calc, color='red', linestyle='--')
+        ax3.axhline(y=self.D_calc, color='black', linestyle='--')
         ax3.set_title('Dcalculado > Dcritico: Rejeita H0')
         ax3.set_ylabel("Dcritico")
         ax3.set_xlabel("Alpha value")
-        ax3.text(0.01, self.D_calc + 0.0001, f'Dcalculado: {self.D_calc:.2f}', color='red')
+        ax3.text(0.01, self.D_calc + 0.0001, f'Dcalculado: {self.D_calc:.2f}', color='black')
         handles, labels = ax3.get_legend_handles_labels() #legendas
         red_patch = mpatches.Patch(color='red', label='Rejeita H0 - Nao Normal')
         blue_patch = mpatches.Patch(color='blue', label='Aceita H0 - Dist Normal')
@@ -126,11 +125,7 @@ class KolmogorovSmirnovTest:
         ax4.set_xlabel("Alpha value")
 
         plt.show()
-        
-    def plotDcrit(self):
-        
-        print(self.Dcrit_values)
-        
+   
     
             
             
