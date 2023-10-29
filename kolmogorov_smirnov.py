@@ -107,7 +107,7 @@ class KolmogorovSmirnovTest:
         variable_name = self.target_column
         ax1.set_xlabel(f'{variable_name}')
         ax1.set_ylabel('Count')  # Adicione um rótulo ao eixo y
-        ax1.set_title('Bar Chart')  # Altere o título para "Bar Chart"
+        ax1.set_title('Grafico de Barras')  # Altere o título para "Bar Chart"
         
         ax2.scatter(self.frequency_absolute['Fesp'],self.frequency_absolute['Fobs'])
         ax2.set_title('Esperado x Observado')
