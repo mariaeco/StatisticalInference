@@ -143,8 +143,6 @@ class KolmogorovSmirnovTest:
 
         plt.show()
 
-        
-    
 
 if __name__ == "__main__":
     ks = KolmogorovSmirnovTest("maquinaAgric2.csv", "ProdMaq")
