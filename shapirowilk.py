@@ -1,12 +1,13 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches #para legendas manuais
 import math
 import scipy.stats as st
 
 class ShapiroWilkTest:
-    def __init__(self, data_filename, target_column, alpha):
-        self.alpha = alpha
+    def __init__(self, data_filename, target_column):
+        #self.alpha = alpha
         self.data = pd.read_csv(data_filename)
         self.target_column = target_column
         self.df = pd.DataFrame() # Tabela que iremos colocar os valores
@@ -22,35 +23,26 @@ class ShapiroWilkTest:
         self.df["a_i,n (X_(n-i+1) - X_i)"] = self.df["a_i,n"] * (self.df["X_(n-i+1)"] - self.df["X_i"])
 
     def run_test(self):
+        
+        self.a_values = [0.01, 0.02, 0.05,	0.1,	0.5, 0.9, 0.95, 0.98,0.99]
         media = self.data[self.target_column].mean()
         b = sum(self.df["a_i,n (X_(n-i+1) - X_i)"])
-        w_calc = (b**2)/(sum((xi - media)**2 for xi in self.data[self.target_column]))
-        w_crit = criticos[str(self.alpha)][len(self.data)-3] # pois a amostra começa tamanho 3
+        self.w_calc = (b**2)/(sum((xi - media)**2 for xi in self.data[self.target_column]))
+        self.criticos= pd.DataFrame(criticos) # Tabela que iremos colocar os valores
+        self.w_crit = []
+        for alpha in self.a_values:
+            index = len(self.data) - 3
+            self.w_c = self.criticos.iloc[index][str(alpha)]
+            self.w_crit.append(self.w_c)
+        
+        
         print("\n----------- Tabela: Shapiro-Wilk -----------")
         print(self.df)
-
-        print("\nWcalculado:", round(w_calc, 3))
-        print("WCritico:", round(w_crit, 3))
-
-        if w_calc > w_crit:
-            print(" --> A variável  Segue uma Distribuicao Normal <--")
-        else:
-            print(" --> A variável NAO Segue uma Distribuicao Normal <--")
-            
-
-    #Se a variavel for CONTINUA USAR HISTOGRAMA
-    #Se for Discreta, GRAFICO DE BARRAS            
-    '''
-    def plot_histograms(self):# HISTOGRAMA APENAS PARA VARIAVEIS CONTINUAS
-        fig, (ax1) = plt.subplots(1, 1, figsize=(10, 4))
-        ax1.hist(self.data[self.target_column], bins=6, edgecolor='black') 
-        variable_name = self.target_column
-        ax1.set_xlabel(f'{variable_name}')
-        ax1.set_title('Histogram')
-        plt.show()
-        '''
+        
+         
+    #PLOTANDO GRAFICO DE BARRA PQ A VARIAVEL É DISCRETA - SE FOR CONTINA DEVE PLOTAR HISTOGRAMA
     def barplot(self):
-        fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
+        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(13, 4))
         # Use plt.bar para criar um gráfico de barras
         unique_values, counts = np.unique(self.data[self.target_column], return_counts=True)
         ax1.bar(unique_values, counts, align='center', edgecolor='black')
@@ -58,12 +50,34 @@ class ShapiroWilkTest:
         ax1.set_xlabel(f'{variable_name}')
         ax1.set_ylabel('Count')  # Adicione um rótulo ao eixo y
         ax1.set_title('Grafico de Barras')  # Altere o título para "Bar Chart"
+        
+        #PLOT 3 - ALPHA X DCRITIC -------------------------------------------------------------------------------------
+        colors = ['red' if self.w_calc < Wcrit else 'blue' for Wcrit in self.w_crit]
+        bin = [0 if self.w_calc < Wcrit else 1 for Wcrit in self.w_crit]
+        
+        ax2.scatter(self.a_values,self.w_crit, c = colors)
+        ax2.axhline(y=self.w_calc, color='black', linestyle='--')
+        ax2.set_title('Wcalculado < Wcritico: Rejeita H0')
+        ax2.set_ylabel("Wcritico")
+        ax2.set_xlabel("Alpha value")
+        ax2.text(0.01, self.w_calc + 0.0001, f'Wcalculado: {self.w_calc:.2f}', color='black')
+        handles, labels = ax3.get_legend_handles_labels() #legendas
+        red_patch = mpatches.Patch(color='red', label='Rejeita H0 - Nao Normal')
+        blue_patch = mpatches.Patch(color='blue', label='Aceita H0 - Dist Normal')
+        ax2.legend(handles=[blue_patch, red_patch])
+
+        ax3.scatter(self.a_values,bin, c = colors)
+        ax3.set_ylabel("0 - Rejeita/ 1 - Aceita H0")
+        ax3.set_xlabel("Alpha value")
+
+        
+        
         plt.show()
 
 
 coeficientes = pd.read_csv("coeficientesShapiro.csv", na_values="NA")
 criticos = pd.read_csv("valoresCriticosShapiro.csv")
-sw = ShapiroWilkTest("p_mensal_avioes.csv", "prodAvioes", 0.01)
+sw = ShapiroWilkTest("p_mensal_avioes.csv", "prodAvioes")
 sw.run_test()
 #sw.plot_histograms()
 sw.barplot()
