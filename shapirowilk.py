@@ -57,9 +57,8 @@ class ShapiroWilkTest:
         variable_name = self.target_column
         ax1.set_xlabel(f'{variable_name}')
         ax1.set_ylabel('Count')  # Adicione um rótulo ao eixo y
-        ax1.set_title('Bar Chart')  # Altere o título para "Bar Chart"
+        ax1.set_title('Grafico de Barras')  # Altere o título para "Bar Chart"
         plt.show()
-
 
 
 coeficientes = pd.read_csv("coeficientesShapiro.csv", na_values="NA")
