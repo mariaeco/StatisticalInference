@@ -56,6 +56,7 @@ class ShapiroWilkTest:
     #PLOTANDO GRAFICO DE BARRA PQ A VARIAVEL É DISCRETA - SE FOR CONTINA DEVE PLOTAR HISTOGRAMA
     def grafico(self):
         fig, ((ax1, ax2),(ax3, ax4)) = plt.subplots(2, 2, figsize=(8, 10))
+        plt.subplots_adjust(hspace=0.4) # aumento a distancia entre graficos superiores e inferiores
         # Use plt.bar para criar um gráfico de barras
         unique_values, counts = np.unique(self.data[self.target_column], return_counts=True)
         ax1.bar(unique_values, counts, align='center', edgecolor='black')
