@@ -1,15 +1,68 @@
 from scipy.stats import norm
+from kolmogorov_smirnov import KolmogorovSmirnovTest
+import random
+import numpy as np
+import pandas as pd
+import statistics
 # Para uma amostra aleatória de tamanho n
 # Média desconhecida
 # Variância conhecida
+# Iremos fazer: Teste Bicauldal
+
+class Teste_Z:
+    def __init__(self, valor, alpha):
+        self.alpha = alpha
+        self.valor = valor
+        self.num_samples = random.randrange(30,40)
+        randomVar = np.random.normal(size=self.num_samples)
+        self.data = pd.DataFrame({'RandomVar': randomVar})
+        self.target_column = 'RandomVar'
+        self.ks = KolmogorovSmirnovTest(self.data, self.target_column, self.alpha)
+        self.is_normal()
+        self.plot_grafico()
+
+    def plot_grafico(self):
+        pass
+        # Aqui a gente vai fazer um grafico de linhas(variaveis contínuas) 
+        # ou barras (variaveis discretas) para mostrar a variavel
+        # Independentemente se a amostra é normal ou não
+
+    def is_normal(self):
+        self.ks.calculate_expected() # Terminar de calcular as variaveis da amostra
+        if self.ks.run_test() == True:
+            print("A amostra segue uma distribuição normal para alfa =", self.alpha)
+            print()
+            # Fazendo o teste:
+            self.teste()
+        else:
+            print("A amostra não segue uma distribuição normal\n   ---> Portanto o Teste Z não pode ser feito")
+
+    def teste(self):
+        # fazer para todos os alfas q a gente tem no arquivo ou só alguns?
+        m = self.data[self.target_column].mean()
+        self.data = [valor for valor in self.data[self.target_column]] # transformar o df em lista para fazer os calculos
+        
+        # Calculando z_calculado
+        variancia_amostra = statistics.stdev(self.data)
+        erro_padrão = variancia_amostra/(self.num_samples)**(1/2)
+        z_calculado = (m - self.valor)/erro_padrão
+        
+        # Calculado Zc
+        # normal seguindo (mi, s) = (0, 1)
+        muz = 0 # media da normal
+        desvio_padrao = 1 # desvio padrão
+        pr = self.alpha/2 # Pois é bicaudal
+        zc = norm.ppf(pr, muz, desvio_padrao)
+
+        if z_calculado > zc:
+            print(f"Bicaudal: Como o valor {z_calculado} > {zc} aceitamos H0 a um nível de {self.alpha*100}% de significância")
+        else:
+            print("Bicaudal: Rejeitamos H0 do valor", self.valor)
+
+tz = Teste_Z(10, 0.05)
+
 
 """
-Um fabricante de cereais afirma que a quantidade média de fibra alimentar em cada porção do seu produto é no mínimo 4.2g 
-com desvio padrão de 1g. Uma agência de saúde deseja verificar se essa afirmação procede, coletando uma amostra de 42 porções,
-obtendo uma média de 3.2g. Com um nível de significância de 5%, existem evidências para rejeitar a afirmação? 
-Use um desvio padrão de 2g.
-"""
-
 # H_0: mi >= 4.2g
 mi = 4.2
 # desvio padrão
@@ -39,3 +92,4 @@ if z > zc:
     print(f"Como o valor {z} > {zc} aceitamos H0 a um nível de {alpha*100}% de significância")
 else:
     print("Rejeitamos H0")
+"""
