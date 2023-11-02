@@ -143,7 +143,7 @@ class KolmogorovSmirnovTest:
 if __name__ == "__main__":
     # all_normal = False -> vai seguir uma distribuição poisson
     # all_normal = True -> vai seguir uma distribuição normal
-    ks = KolmogorovSmirnovTest(all_normal = False)
+    ks = KolmogorovSmirnovTest(all_normal = True)
     ks.calculate_expected()
     ks.run_test()
     ks.graficos()
